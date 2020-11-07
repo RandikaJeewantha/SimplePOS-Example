@@ -1,0 +1,182 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+@foreach (var claim in User.Claims)
+{
+    @if (@claim.Type == "role" && @claim.Value == "Admin")
+    {
+        <div class="content-wrapper">
+            <div class="content">
+
+                <div class="row">
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="card card-mini mb-4">
+                            <div class="card-body">
+                                <h2 class="mb-1">@ViewBag.CategoryCount</h2>
+                                <p>Product Catagories</p>
+                                <div class="chartjs-wrapper">
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="card card-mini  mb-4">
+                            <div class="card-body">
+                                <h2 class="mb-1">@ViewBag.ProductCount</h2>
+                                <p>No. Products</p>
+                                <div class="chartjs-wrapper">
+                                    <canvas id="dual-line"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="card card-mini mb-4">
+                            <div class="card-body">
+                                <h2 class="mb-1">@ViewBag.OrderCountThisMonth</h2>
+                                <p>Monthly Total Order</p>
+                                <div class="chartjs-wrapper">
+                                    <canvas id="area-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="card card-mini mb-4">
+                            <div class="card-body">
+                                <h2 class="mb-1">@ViewBag.RevenueCountThisMonth</h2>
+                                <p>Total Revenue This Year</p>
+                                <div class="chartjs-wrapper">
+                                    <canvas id="line"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-12">
+
+                        <div class="card card-table-border-none" data-scroll-height="550">
+                            <div class="card-header justify-content-between">
+                                <h2>Sold by Units / Products</h2>
+                            </div>
+                            <div class="card-body slim-scroll py-0">
+                                <div class="row list_div">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+
+                        <div class="card card-table-border-none" id="recent-orders">
+                            <div class="card-header justify-content-between">
+                                <h2>Recent Orders</h2>
+                            </div>
+                            <div class="card-body pt-0 pb-5">
+                                <table class="text-center table card-table table-responsive table-responsive-large" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none d-md-table-cell">Order ID</th>
+                                            <th class="d-none d-md-table-cell">Employee</th>
+                                            <th class="d-none d-md-table-cell">Order Cost</th>
+                                            <th class="d-none d-md-table-cell">Order Date</th>
+                                            <th class="d-none d-md-table-cell">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var Order in ViewBag.Orders as List<SuperMarketECommerceWebApp.Models.Order>)
+                                        {
+                                            <tr>
+                                                <td>@Order.OrderId</td>
+                                                <td class="d-none d-md-table-cell">@Order.Employee</td>
+                                                <td class="d-none d-md-table-cell">Rs @Order.OrderCost</td>
+                                                <td class="d-none d-md-table-cell">@Order.Date</td>
+                                                <td class="d-none d-md-table-cell">
+                                                    <a class="btn btn-primary m-1 text-white" asp-controller="Orders" asp-action="Details" asp-route-id="@Order.OrderId">View</a>
+                                                    <a class="btn btn-danger m-1 text-white" asp-controller="Orders" asp-action="Delete" asp-route-id="@Order.OrderId">Remove</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+    @if (@claim.Type == "role" && @claim.Value != "Admin")
+    {
+
+        @foreach (var claimagain in User.Claims)
+        {
+            @if (claimagain.Type == "user")
+            {
+                <div class="content-wrapper">
+                    <div class="content mt-5 text-center">
+                        <h2>
+                            WellCome @claimagain.Value !
+                        </h2>
+                    </div>
+                </div>
+            }
+        }
+    }
+}
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+        productList = {};
+
+        var jsonListProducts = '@Html.Raw(Json.Serialize(ViewBag.Products))';
+        var jsListProducts = JSON.parse(jsonListProducts);
+
+        for (i = 0; i < jsListProducts.length; i++) {
+            productList[jsListProducts[i].productName] = 0;
+        }
+
+        var jsonList = @Html.Raw(Json.Serialize(ViewBag.jsdata));
+
+        for (var obj in jsonList) {
+
+            var item_obj = JSON.parse(jsonList[obj]["items"]);
+
+            for (var items in item_obj) {
+                productList[item_obj[items]["productName"]] += parseInt(item_obj[items]["quantity"]);
+            }
+
+        }
+
+        var list = "";
+
+        for (var product in productList) {
+
+            list +=
+                "<div class='col-4 p-2' >" +
+                    "<div class='row justify-content-around bg-light-gray p-1 m-2'>" +
+                        "<span class='text-dark'>" + product + "</span>" +
+                        "<span>" + productList[product] + "</span>" +
+                    "</div>" +
+                "</div >"
+                ;
+        }
+
+        $(".list_div").append(list);
+
+    </script>
+}

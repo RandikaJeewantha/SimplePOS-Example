@@ -1,0 +1,90 @@
+﻿@model IEnumerable<SuperMarketECommerceWebApp.Models.User>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <div class="row d-flex justify-content-center">
+
+        <div class="col-12 mt-5 text-left">
+            <div class="table-responsive-xl">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.FirstName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.SecondName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Gender)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Position)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Email)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Password)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.PhoneNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.ContactAddress)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.DateOfBirth)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FirstName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.SecondName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Gender)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Position)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Email)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Password)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.ContactAddress)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.DateOfBirth)
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@item.AccountId"><i class="font-size-20 text-info fa fa-info-circle" aria-hidden="true"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.AccountId"><i class="font-size-20 text-success fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.AccountId"><i class="font-size-20 text-danger fa fa-trash-o" aria-hidden="true"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

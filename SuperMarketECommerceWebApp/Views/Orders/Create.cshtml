@@ -1,0 +1,322 @@
+﻿@model SuperMarketECommerceWebApp.Models.Order
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <br/>
+    <button type="reset" class="mb-1 btn btn-danger float-right" onClick="window.location.reload();">Refresh</button>
+
+    <div class="table-responsive mt-2">
+
+        <table id="table_data" class="table">
+
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="row justify-content-around">
+        <span class="text-warning font-weight-bolder">No. Items : <input class="text-center" type="number" id="items_count" disabled /></span>
+        <span class="text-danger font-weight-bolder">Total : <input class="text-center" type="number" id="total" disabled /></span>
+    </div>
+
+</div>
+
+<div class="container-fluid mt-3">
+
+    <div class="row d-flex justify-content-center">
+
+        <form asp-action="Create">
+
+            <div class="row">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            </div>
+
+            <div class="row">
+
+                <div class="form-group">
+                    <label asp-for="CustomerName" class="control-label"></label>
+                    <input asp-for="CustomerName" class="customer-name form-control" />
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="control-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control phone-number" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Gender" class="control-label"></label>
+                    <select asp-for="Gender" class="form-control gender">
+                        <option value="">Choose Gender</option>
+                        <option class="form-control" value="Male">Male</option>
+                        <option class="form-control" value="Female">Female</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" hidden>
+                    <label asp-for="Items" class="control-label"></label>
+                    <input asp-for="Items" class="form-control items-info" />
+                    <span asp-validation-for="Items" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" hidden>
+                    <label asp-for="OrderCost" class="control-label"></label>
+                    <input asp-for="OrderCost" class="form-control order-cost" />
+                    <span asp-validation-for="OrderCost" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" hidden>
+                    <label asp-for="Employee" class="control-label"></label>
+                    @foreach (var claim in User.Claims)
+                    {
+                        @if (@claim.Type == "user")
+                        {
+                            <input asp-for="Employee" class="employee form-control" value="@claim.Value" />
+                        }
+                    }
+                    <span asp-validation-for="Employee" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" hidden>
+                    <label asp-for="Date" class="control-label"></label>
+                    <input asp-for="Date" class="form-control date" />
+                    <span asp-validation-for="Date" class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create Bill And Finish" class="submit-btn btn btn-success" />
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-item">Add Item</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="add-item" tabindex="-1" role="dialog" aria-labelledby="add-item" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Item Adding</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label class="control-label">Item Name</label>
+                    <select class="item_ form-control">
+
+                        <option class="form-control" value="">first select the product</option>
+                        
+                        @foreach (var product in ViewBag.Products as List<SuperMarketECommerceWebApp.Models.Product>)
+                        {
+                            <option class="form-control" value="@product.ProductId">@product.ProductName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Item Quantity</label>
+                    <input type="number" id="qty" class="form-control" placeholder="Add quantity" />
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="assignValues()">Save changes</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+        var employee = $(".employee").val();
+        var date_time = null;
+
+        var total = 0;
+        var sub_total = 0;
+        var item_count = 0;
+
+        var item_no = null;
+        var price = 0;
+        var productName = null;
+        var quantity = 0;
+
+        var items_info_array = [];
+        var items_info_array_count = -1;
+        var items_info = "";
+
+        var customer_name = null;
+        var phone_number = null;
+        var gender = null;
+
+        item_no = $(".item_").val();
+        quantity = $("#qty").val();
+
+        submitBtn();
+        finalizeData();
+
+        $(document).ready(function () {
+
+            $(".item_").on("change", function () {
+                item_no = $(this).val();
+            });
+
+            $("#qty").on("change", function () {
+                quantity = $(this).val();
+                if (quantity < 0 || quantity == undefined) {
+                    quantity = 0;
+                }
+            });
+
+            $(".customer-name").on("change", function () {
+                customer_name = $(this).val();
+                submitBtn();
+            });
+
+            $(".phone-number").on("change", function () {
+                phone_number = $(this).val();
+                submitBtn();
+            });
+
+            $(".gender").on("change", function () {
+                gender = $(this).val();
+                submitBtn();
+            });
+
+        });
+
+        var jsonList = '@Html.Raw(Json.Serialize(ViewBag.Products))';
+        var jsList = JSON.parse(jsonList);
+
+        function assignValues() {
+
+            for (i = 0; i < jsList.length; i++) {
+
+                if (item_no == jsList[i].productId) {
+                    price = jsList[i].price;
+                    productName = jsList[i].productName;
+
+                    break;
+                }
+
+            }
+
+            items_info_array_count += 1;
+
+            sub_total = quantity * price;
+
+            var table =
+                "<tr>" +
+                "<td>" + productName + "</td>" +
+                "<td>" + price + "</td>" +
+                "<td>" + quantity + "</td>" +
+                "<td>" + sub_total + "</td>" +
+                "<td> <button type='button' name='record' class='btn btn-danger btn-sm' onclick='deleterow(this, " + items_info_array_count + ")'>Delete</td>" +
+                "</tr>";
+
+            total += Number(sub_total);
+
+            $("#table_data tbody").append(table);
+
+            item_count += 1; 
+
+            $("#items_count").val(item_count);
+            $("#total").val(total);
+
+            $("#add-item").modal("hide");
+
+            items_info_array[items_info_array_count] = { productName: productName, price: price, quantity: quantity, sub_total: sub_total };
+
+            finalizeData();
+            submitBtn();
+        }
+
+        function deleterow(d,c) {
+            
+            total_cost = parseInt($(d).parent().parent().find("td:nth(3)").text(), 10);
+            total -= Number(total_cost);
+
+            item_count -= 1;
+
+            delete items_info_array[c];
+
+            $("#items_count").val(item_count);
+            $("#total").val(total);
+
+            $(d).parent().parent().remove();
+
+            finalizeData();
+            submitBtn();
+        }
+
+        function submitBtn() {
+
+            if (
+                customer_name == null || phone_number == null || gender == null ||
+                customer_name == "" || phone_number == "" || gender == "" ||
+                employee == null || items_info == null || date_time == null ||
+                employee == "" || items_info == "" || date_time == ""
+            ) {
+                $('.submit-btn').prop('disabled', true);
+            }
+            else {
+                $('.submit-btn').prop('disabled', false);
+            }
+
+        }
+
+        function finalizeData() {
+
+            items_info = "";
+            arrayToString();
+            $(".items-info").val(items_info);
+
+            $(".order-cost").val(total.toString());
+
+            date_time = new Date();
+            $(".date").val(date_time.toLocaleString());
+
+        }
+
+        function arrayToString(value) {
+
+            var filterArray = items_info_array.filter(function (e) { return e != null; });
+
+            items_info = JSON.stringify(filterArray);
+
+        }
+
+    </script>
+}
